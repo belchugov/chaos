@@ -25,7 +25,7 @@ app.get("/", function(req, res) {
 
     Promise.all(ids.map(i => getArticle(i)))
       .then(articles => {
-        res.json(articles);
+        res.send(articles);
       })
       .catch(err => {
         res.send("Some error");
@@ -59,7 +59,9 @@ const getArticle = id => {
           reject("unable to find file");
         }
         files.forEach(file => {
-          resolve(file.content.toString("utf8"));
+          let content = JSON.parse(file.content.toString("utf8"));
+          content.id = id;
+          resolve(content);
         });
       });
     });
