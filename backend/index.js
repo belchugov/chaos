@@ -1,5 +1,5 @@
+const serverless = require('serverless-http');
 const express = require("express");
-const fileUpload = require("express-fileupload");
 const ipfsAPI = require("ipfs-api");
 const fs = require("fs");
 
@@ -39,7 +39,6 @@ app.get("/post/:id", function(req, res) {
 
 app.post("/post", function(req, res) {
   let fileContent = { title: req.body.title, body: req.body.body };
-  console.log(req.body);
   ipfs.files.add(Buffer.from(JSON.stringify(fileContent)), function(err, file) {
     if (err) throw err;
 
@@ -51,6 +50,10 @@ app.post("/post", function(req, res) {
   });
 });
 
+app.put("/post/:id", function(req, res) {
+  res.send("updated")
+});
+
 const getArticle = id => {
   if (id) {
     return new Promise((resolve, reject) => {
@@ -60,8 +63,7 @@ const getArticle = id => {
         }
         files.forEach(file => {
           let content = JSON.parse(file.content.toString("utf8"));
-          content.id = id;
-          resolve(content);
+          resolve({...content, id: id});
         });
       });
     });
@@ -69,3 +71,5 @@ const getArticle = id => {
 };
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`));
+
+module.exports.handler = serverless(app);
