@@ -2,50 +2,65 @@ const express = require("express");
 const fileUpload = require("express-fileupload");
 const ipfsAPI = require("ipfs-api");
 const fs = require("fs");
-const faker = require("faker");
 
 const app = express();
-app.use(fileUpload());
-
 const port = 3000;
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+const articles = "articles.txt";
 const ipfs = ipfsAPI({
   host: "localhost",
   port: 5001,
   protocol: "http"
 });
 
-app.get("/post/:id", function(req, res) {
-  ipfs.files.get(req.params.id, (err, files) => {
-    if (err) {
-      res.send("Unable to find file");
-    }
-    files.forEach(file => {
-      res.send(file.content.toString("utf8"));
-    });
+app.get("/", function(req, res) {
+  fs.readFile(articles, "utf-8", (err, data) => {
+    if (err) throw err;
+    let ids = data.toString().split(",");
+    let promises = ids.map(i => getArticle(i));
+    console.log(promises);
+    Promise.all(promises)
+      .then(articles => {
+        console.log(articles);
+        res.send(articles);
+      })
+      .catch(err => {
+        res.send("Some error");
+      });
   });
 });
 
+app.get("/post/:id", function(req, res) {
+  getArticle(req.params.id).then(x => res.send(x));
+});
+
 app.post("/post", function(req, res) {
-  let buffer = Buffer.from(req.files.article.data)
-  ipfs.files.add(buffer, function(err, file) {
-    if (err) {
-      console.log(err);
-    }
+  let fileContent = { title: req.body.title, body: req.body.body };
+  console.log(req.body);
+  ipfs.files.add(Buffer.from(JSON.stringify(fileContent)), function(err, file) {
+    if (err) throw err;
+
+    fs.appendFile(articles, file[0].hash + ",", function(err) {
+      if (err) throw err;
+    });
+
     res.send(file);
   });
 });
 
-app.listen(port, () => console.log(`Example app listening on port ${port}!`));
-
-function getFakePosts(number) {
-  let array = [];
-  for (let i = 0; i < number; i++) {
-    array.push({
-      title: faker.lorem.word(),
-      body: faker.lorem.paragraph(),
-      date: faker.date.recent(10)
+const getArticle = id => {
+  return new Promise((resolve, reject) => {
+    ipfs.files.get(id, (err, files) => {
+      if (err) {
+        reject("unable to find file");
+      }
+      files.forEach(file => {
+        resolve(file.content.toString("utf8"));
+      });
     });
-  }
+  });
+};
 
-  return array;
-}
+app.listen(port, () => console.log(`Example app listening on port ${port}!`));
