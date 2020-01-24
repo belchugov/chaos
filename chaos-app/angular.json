@@ -125,7 +125,11 @@
         },
         "deploy": {
           "builder": "angular-cli-ghpages:deploy",
-          "options": {}
+          "options": {
+            "baseHref": "http://belchugov.github.io/chaos",
+            "name": "Dimitar Belchugov",
+            "email": "d.belchugov@gmail.com"
+          }
         }
       }
     }
