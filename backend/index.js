@@ -6,6 +6,7 @@ const fs = require("fs");
 const app = express();
 const port = 3000;
 
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 const articles = "articles.txt";
