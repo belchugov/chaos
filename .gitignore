@@ -1,2 +1,4 @@
 # IntelliJ idea folder project
 .idea/
+
+*/node_modules/*
