@@ -18,13 +18,14 @@ const ipfs = ipfsAPI({
 app.get("/", function(req, res) {
   fs.readFile(articles, "utf-8", (err, data) => {
     if (err) throw err;
-    let ids = data.toString().split(",");
-    let promises = ids.map(i => getArticle(i));
-    console.log(promises);
-    Promise.all(promises)
+    let ids = data
+      .toString()
+      .split(",")
+      .filter(x => x != "");
+
+    Promise.all(ids.map(i => getArticle(i)))
       .then(articles => {
-        console.log(articles);
-        res.send(articles);
+        res.json(articles);
       })
       .catch(err => {
         res.send("Some error");
@@ -51,16 +52,18 @@ app.post("/post", function(req, res) {
 });
 
 const getArticle = id => {
-  return new Promise((resolve, reject) => {
-    ipfs.files.get(id, (err, files) => {
-      if (err) {
-        reject("unable to find file");
-      }
-      files.forEach(file => {
-        resolve(file.content.toString("utf8"));
+  if (id) {
+    return new Promise((resolve, reject) => {
+      ipfs.files.get(id, (err, files) => {
+        if (err) {
+          reject("unable to find file");
+        }
+        files.forEach(file => {
+          resolve(file.content.toString("utf8"));
+        });
       });
     });
-  });
+  }
 };
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`));
