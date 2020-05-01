@@ -22,7 +22,7 @@
             "main": "src/main.ts",
             "polyfills": "src/polyfills.ts",
             "tsConfig": "tsconfig.app.json",
-            "aot": false,
+            "aot": true,
             "assets": [
               "src/favicon.ico",
               "src/assets"
@@ -45,7 +45,6 @@
               "sourceMap": false,
               "extractCss": true,
               "namedChunks": false,
-              "aot": true,
               "extractLicenses": true,
               "vendorChunk": false,
               "buildOptimizer": true,
@@ -138,5 +137,8 @@
       }
     }
   },
-  "defaultProject": "chaos-app"
+  "defaultProject": "chaos-app",
+  "cli": {
+    "analytics": "0c65a4e0-9394-4398-8af7-51cf1ccf6c85"
+  }
 }
